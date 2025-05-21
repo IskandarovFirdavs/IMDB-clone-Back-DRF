@@ -32,12 +32,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, min_length=8, required=True)
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user = authenticate(username=data['username'], password=data['password'])
-
-        if user and user.is_active:
-            return user
-        raise serializers.ValidationError("Incorrect username or password")
-
+        user = authenticate(username=data.get('username'), password=data.get('password'))
+        if not user:
+            raise serializers.ValidationError("Login yoki parol noto‘g‘ri")
+        data['user'] = user
+        return data

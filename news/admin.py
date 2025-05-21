@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import News, Trivia
+from .models import News, Trivia, Source
 
 
 @admin.register(News)
@@ -16,3 +16,8 @@ class TriviaAdmin(admin.ModelAdmin):
     search_fields = ('content',)
     list_filter = ('title', 'person')
     autocomplete_fields = ('title', 'person')
+
+@admin.register(Source)
+class TriviaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'url', 'description')
+    search_fields = ('name',)

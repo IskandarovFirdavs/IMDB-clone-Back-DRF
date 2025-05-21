@@ -1,15 +1,30 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+
 from .views import (
-    GenreViewSet, TitleViewSet, EpisodeViewSet,
-    ReviewViewSet, WatchlistViewSet, RatingViewSet
+    GenreListCreateView, GenreRetrieveUpdateDestroyView,
+    TitleListView, TitleCreateView, TitleRetrieveView, TitleUpdateView, TitleDestroyView, GenreViewSet,
+    RecentReviewListView,
+    # ... other view imports ...
 )
 
-router = DefaultRouter()
-router.register(r'genres', GenreViewSet)
-router.register(r'titles', TitleViewSet)
-router.register(r'episodes', EpisodeViewSet)
-router.register(r'reviews', ReviewViewSet)
-router.register(r'watchlists', WatchlistViewSet)
-router.register(r'ratings', RatingViewSet)
 
-urlpatterns = router.urls
+router = DefaultRouter()
+router.register(r'genres', GenreViewSet, 'genre')
+
+urlpatterns = [
+    # Genre URLs
+    # path('genres/', GenreListCreateView.as_view(), name='genre-list'),
+    # path('genres/<int:pk>/', GenreRetrieveUpdateDestroyView.as_view(), name='genre-detail'),
+
+    # Title URLs
+    path('titles/', TitleListView.as_view(), name='title-list'),
+    path('titles/create/', TitleCreateView.as_view(), name='title-create'),
+    path('titles/<int:pk>/', TitleRetrieveView.as_view(), name='title-detail'),
+    path('titles/<int:pk>/update/', TitleUpdateView.as_view(), name='title-update'),
+    path('titles/<int:pk>/delete/', TitleDestroyView.as_view(), name='title-delete'),
+    path('reviews/', RecentReviewListView.as_view(), name='recent-reviews'),
+
+]
+
+urlpatterns += router.urls
