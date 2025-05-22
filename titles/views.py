@@ -135,13 +135,15 @@ class WatchlistListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class WatchlistRetrieveDestroyView(generics.RetrieveDestroyAPIView):
+
+class WatchlistRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WatchlistSerializer
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'pk'
 
     def get_queryset(self):
         return Watchlist.objects.select_related('user', 'title').filter(user=self.request.user)
+
 
 
 # Rating Views

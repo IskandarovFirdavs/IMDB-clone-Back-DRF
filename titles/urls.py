@@ -4,8 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     GenreListCreateView, GenreRetrieveUpdateDestroyView,
     TitleListView, TitleCreateView, TitleRetrieveView, TitleUpdateView, TitleDestroyView, GenreViewSet,
-    RecentReviewListView,
-    # ... other view imports ...
+    RecentReviewListView, WatchlistListCreateView, WatchlistRetrieveUpdateDestroyView,
 )
 
 
@@ -24,6 +23,8 @@ urlpatterns = [
     path('titles/<int:pk>/update/', TitleUpdateView.as_view(), name='title-update'),
     path('titles/<int:pk>/delete/', TitleDestroyView.as_view(), name='title-delete'),
     path('reviews/', RecentReviewListView.as_view(), name='recent-reviews'),
+    path('watchlists/', WatchlistListCreateView.as_view(), name='watchlist-list-create'),
+    path('watchlists/<int:pk>/', WatchlistRetrieveUpdateDestroyView.as_view(), name='watchlist-detail'),
 
 ]
 

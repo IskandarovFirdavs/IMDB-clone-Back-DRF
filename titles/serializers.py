@@ -51,12 +51,18 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class WatchlistSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
-    title = serializers.StringRelatedField()
+    user = serializers.StringRelatedField(read_only=True)
+    title = TitleSerializer(read_only=True)  # <- Bu yerda nested serializer
 
     class Meta:
         model = Watchlist
         fields = '__all__'
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data.pop('user', None)
+        return Watchlist.objects.create(user=user, **validated_data)
+
 
 
 class RatingSerializer(serializers.ModelSerializer):
