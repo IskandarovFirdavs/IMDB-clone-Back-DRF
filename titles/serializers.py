@@ -68,23 +68,21 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class WatchlistSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    title = serializers.PrimaryKeyRelatedField(queryset=Title.objects.all())
 
     class Meta:
         model = Watchlist
-        fields = ('id', 'title', 'user', 'added_at', 'status')
-        validators = [
-            serializers.UniqueTogetherValidator(
-                queryset=Watchlist.objects.all(),
-                fields=['user', 'title'],
-                message='This title is already in your watchlist.'
-            )
-        ]
+        fields = ['id', 'title', 'user', 'added_at', 'status']
 
     def validate_status(self, value):
         valid_statuses = [choice[0] for choice in Watchlist.STATUS_CHOICES]
         if value not in valid_statuses:
-            raise serializers.ValidationError(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+            raise serializers.ValidationError(f"Status must be one of {valid_statuses}")
         return value
+
+
+
+
 
 
 class RatingSerializer(serializers.ModelSerializer):

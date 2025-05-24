@@ -12,7 +12,8 @@ from .serializers import (
     WatchlistSerializer,
     RatingSerializer
 )
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 # Genre Views
 class GenreListCreateView(generics.ListCreateAPIView):
@@ -35,12 +36,18 @@ class GenreRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
 
-# Title Views
+
+
 class TitleListView(generics.ListAPIView):
     queryset = Title.objects.prefetch_related('genres').all()
     serializer_class = TitleSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter]
+    search_fields = ['primary_title', 'original_title']
+    filterset_fields = ['title_type']
+    ordering_fields = ['start_year', 'average_rating', 'primary_title']
+
 
 
 class TitleCreateView(generics.CreateAPIView):
@@ -109,7 +116,7 @@ class WatchlistListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Watchlist.objects.select_related('user', 'title').filter(user=self.request.user)
+        return Watchlist.objects.filter(user=self.request.user).select_related('title')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

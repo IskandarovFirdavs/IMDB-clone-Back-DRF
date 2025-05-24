@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     GenreListCreateView, GenreRetrieveUpdateDestroyView,
     TitleListView, TitleCreateView, TitleRetrieveView, TitleUpdateView, TitleDestroyView, GenreViewSet,
-    RecentReviewListView, WatchlistListCreateView, WatchlistRetrieveUpdateDestroyView,
+    RecentReviewListView, WatchlistListCreateView, WatchlistRetrieveUpdateDestroyView
 )
 
 
