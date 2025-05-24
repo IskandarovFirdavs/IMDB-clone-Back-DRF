@@ -1,5 +1,8 @@
 from django.db.models import Avg
 from rest_framework import serializers
+
+from users.models import UserModel
+from users.serializers import UserSerializer
 from .models import Genre, Title, Episode, Review, Watchlist, Rating
 
 
@@ -50,19 +53,38 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ('user', 'created_at')
 
 
+# class WatchlistSerializer(serializers.ModelSerializer):
+#     user = serializers.StringRelatedField(read_only=True)
+#     title = TitleSerializer(read_only=True)  # <- Bu yerda nested serializer
+#
+#     class Meta:
+#         model = Watchlist
+#         fields = '__all__'
+#
+#     def create(self, validated_data):
+#         user = self.context['request'].user
+#         validated_data.pop('user')
+#         return Watchlist.objects.create(user=user, **validated_data)
+
 class WatchlistSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(read_only=True)
-    title = TitleSerializer(read_only=True)  # <- Bu yerda nested serializer
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Watchlist
-        fields = '__all__'
+        fields = ('id', 'title', 'user', 'added_at', 'status')
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Watchlist.objects.all(),
+                fields=['user', 'title'],
+                message='This title is already in your watchlist.'
+            )
+        ]
 
-    def create(self, validated_data):
-        user = self.context['request'].user
-        validated_data.pop('user', None)
-        return Watchlist.objects.create(user=user, **validated_data)
-
+    def validate_status(self, value):
+        valid_statuses = [choice[0] for choice in Watchlist.STATUS_CHOICES]
+        if value not in valid_statuses:
+            raise serializers.ValidationError(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+        return value
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -74,8 +96,8 @@ class RatingSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
 from users.serializers import UserSerializer
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

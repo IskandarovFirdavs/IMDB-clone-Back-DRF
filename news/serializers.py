@@ -55,11 +55,11 @@ class NewsSerializer(serializers.ModelSerializer):
         return None
 
     def get_like_count(self, obj):
-        # If i have a likes system
+        # when i have a likes system
         return getattr(obj, 'like_count', obj.likes.count() if hasattr(obj, 'likes') else 0)
 
     def get_comment_count(self, obj):
-        # If i have comments
+        # when i have comments
         return getattr(obj, 'comment_count', obj.comments.count() if hasattr(obj, 'comments') else 0)
 
     def get_image_url(self, obj):
@@ -75,17 +75,10 @@ class NewsSerializer(serializers.ModelSerializer):
 
 
 class TriviaSerializer(serializers.ModelSerializer):
-    # Adding detailed relationships
     title_detail = serializers.SerializerMethodField()
     person_detail = serializers.SerializerMethodField()
-
-    # Adding verification status
     is_verified = serializers.BooleanField(source='verified', read_only=True)
-
-    # Adding popularity metrics
     upvotes = serializers.IntegerField(read_only=True)
-
-    # Adding source information
     source_name = serializers.CharField(source='source.name', read_only=True)
 
     class Meta:
@@ -93,17 +86,17 @@ class TriviaSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'content', 'title', 'title_detail',
             'person', 'person_detail', 'is_verified',
-            'upvotes', 'source', 'source_name',
+            'upvotes', 'downvotes',  # 🔧 Include downvotes
+            'source', 'source_name',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
 
     def get_title_detail(self, obj):
         if obj.title:
             return {
                 'id': obj.title.id,
-                'name': obj.title.name,
-                'year': obj.title.release_date.year
+                'title': obj.title.primary_title,
+                'type': obj.title.title_type
             }
         return None
 
@@ -111,8 +104,7 @@ class TriviaSerializer(serializers.ModelSerializer):
         if obj.person:
             return {
                 'id': obj.person.id,
-                'name': obj.person.name,
-                'role': obj.person.main_role
+                'name': obj.person.name  # or use str(obj.person)
             }
         return None
 
@@ -139,14 +131,19 @@ class NewsListSerializer(serializers.ModelSerializer):
 
 
 class TriviaListSerializer(serializers.ModelSerializer):
-    """
-    Lightweight serializer for listing trivia
-    """
-    content_preview = serializers.SerializerMethodField()
+    title_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = Trivia
-        fields = ['id', 'content_preview', 'title', 'person', 'upvotes']
+        fields = ['id', 'content_preview', 'title_detail', 'person', 'upvotes']
 
     def get_content_preview(self, obj):
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
+
+    def get_title_detail(self, obj):
+        if obj.title:
+            return {
+                'id': obj.title.id,
+                'title': obj.title.primary_title,
+            }
+        return None

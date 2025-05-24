@@ -41,3 +41,19 @@ class Trivia(models.Model):
 
     class Meta:
         ordering = ['-upvotes']
+
+
+class TriviaVote(models.Model):
+    LIKE = 'like'
+    DISLIKE = 'dislike'
+    VOTE_CHOICES = [
+        (LIKE, 'Like'),
+        (DISLIKE, 'Dislike'),
+    ]
+
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
+    trivia = models.ForeignKey(Trivia, on_delete=models.CASCADE, related_name='votes')
+    vote_type = models.CharField(max_length=7, choices=VOTE_CHOICES)
+
+    class Meta:
+        unique_together = ('user', 'trivia')

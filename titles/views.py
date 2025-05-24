@@ -2,6 +2,7 @@ from rest_framework import generics, permissions, status, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from .models import Genre, Title, Episode, Review, Watchlist, Rating
+from .permissions import IsOwnerOrReadOnly
 from .serializers import (
     GenreSerializer,
     TitleSerializer,
@@ -99,28 +100,7 @@ class ReviewListCreateView(generics.ListCreateAPIView):
 class ReviewRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.select_related('user', 'title').all()
     serializer_class = ReviewSerializer
-
-    def get_permissions(self):
-        if self.request.method in ['PUT', 'PATCH', 'DELETE']:
-            return [permissions.IsAuthenticated()]
-        return [permissions.AllowAny()]
-
-    def perform_update(self, serializer):
-        if serializer.instance.user != self.request.user:
-            return Response(
-                {"detail": "You can only edit your own reviews."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        if instance.user != self.request.user:
-            return Response(
-                {"detail": "You can only delete your own reviews."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
 
 # Watchlist Views
