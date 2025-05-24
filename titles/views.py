@@ -10,10 +10,12 @@ from .serializers import (
     EpisodeSerializer,
     ReviewSerializer,
     WatchlistSerializer,
-    RatingSerializer
+    RatingSerializer,
+    WatchlistGetSerializer,
 )
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+
 
 # Genre Views
 class GenreListCreateView(generics.ListCreateAPIView):
@@ -36,8 +38,6 @@ class GenreRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 
 
-
-
 class TitleListView(generics.ListAPIView):
     queryset = Title.objects.prefetch_related('genres').all()
     serializer_class = TitleSerializer
@@ -47,7 +47,6 @@ class TitleListView(generics.ListAPIView):
     search_fields = ['primary_title', 'original_title']
     filterset_fields = ['title_type']
     ordering_fields = ['start_year', 'average_rating', 'primary_title']
-
 
 
 class TitleCreateView(generics.CreateAPIView):
@@ -111,7 +110,7 @@ class ReviewRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # Watchlist Views
-class WatchlistListCreateView(generics.ListCreateAPIView):
+class WatchlistListCreateView(generics.CreateAPIView):
     serializer_class = WatchlistSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -122,6 +121,13 @@ class WatchlistListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
+class WatchlistListView(generics.ListAPIView):
+    serializer_class = WatchlistGetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Watchlist.objects.filter(user=self.request.user).select_related('title')
+
 
 class WatchlistRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WatchlistSerializer
@@ -130,7 +136,6 @@ class WatchlistRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Watchlist.objects.select_related('user', 'title').filter(user=self.request.user)
-
 
 
 # Rating Views

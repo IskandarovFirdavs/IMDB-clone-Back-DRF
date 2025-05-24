@@ -19,7 +19,22 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'
+        fields = (
+            'id',
+            'title_type',
+            'primary_title',
+            'original_title',
+            'is_adult',
+            'start_year',
+            'end_year',
+            'runtime_minutes',
+            'genres',
+            'poster',
+            'plot',
+            'average_rating',
+            'num_votes',
+            'review_count',
+        )
 
     def get_average_rating(self, obj):
         return obj.ratings.aggregate(avg=Avg('score'))['avg'] or 0
@@ -81,8 +96,13 @@ class WatchlistSerializer(serializers.ModelSerializer):
         return value
 
 
+class WatchlistGetSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    title = TitleSerializer(read_only=True)
 
-
+    class Meta:
+        model = Watchlist
+        fields = ['id', 'title', 'user', 'added_at', 'status']
 
 
 class RatingSerializer(serializers.ModelSerializer):
